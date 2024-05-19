@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dungeon Adventure</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #000;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url('https://www.publicdomainpictures.net/pictures/30000/velka/dark-dungeon.jpg');
+            background-size: cover;
+        }
+        .game-container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 600px;
+        }
+        .choices {
+            margin-top: 20px;
+        }
+        .choice-button {
+            background-color: #444;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .choice-button:hover {
+            background-color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container" id="game-container">
+        <h1>Dungeon Adventure</h1>
+        <p id="story-text">You wake up in a dark dungeon with no memory of how you got there...</p>
+        <div class="choices" id="choices">
+            <button class="choice-button" onclick="makeChoice(1)">Explore the dungeon</button>
+            <button class="choice-button" onclick="makeChoice(2)">Stay and wait</button>
+        </div>
+    </div>
+    <audio id="background-music" loop>
+        <source src="https://www.bensound.com/bensound-music/bensound-creepy.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <script>
+        let currentScene = 0;
+        const storyText = document.getElementById('story-text');
+        const choices = document.getElementById('choices');
+        const backgroundMusic = document.getElementById('background-music');
+
+        backgroundMusic.play();
+
+        const scenes = [
+            {
+                text: 'You wake up in a dark dungeon with no memory of how you got there...',
+                choices: [
+                    { text: 'Explore the dungeon', nextScene: 1 },
+                    { text: 'Stay and wait', nextScene: 2 }
+                ]
+            },
+            {
+                text: 'You explore the dungeon and encounter a goblin!',
+                choices: [
+                    { text: 'Fight the goblin', nextScene: 3 },
+                    { text: 'Run away', nextScene: 4 }
+                ],
+                enemy: 'Goblin',
+                riddle: 'What has keys but can’t open locks?'
+            },
+            {
+                text: 'You stay and wait, but nothing happens...',
+                choices: [
+                    { text: 'Explore the dungeon', nextScene: 1 },
+                    { text: 'Shout for help', nextScene: 5 }
+                ]
+            },
+            {
+                text: 'You defeated the goblin! It reveals a piece of your identity before dying: "You are a warrior of the ancient order."',
+                choices: [
+                    { text: 'Continue exploring', nextScene: 6 },
+                    { text: 'Rest for a while', nextScene: 7 }
+                ]
+            },
+            {
+                text: 'You run away safely but you feel you are missing out on something important...',
+                choices: [
+                    { text: 'Go back to face the goblin', nextScene: 1 },
+                    { text: 'Keep exploring', nextScene: 6 }
+                ]
+            },
+            {
+                text: 'You shout for help, but the only response is the echo of your own voice...',
+                choices: [
+                    { text: 'Explore the dungeon', nextScene: 1 },
+                    { text: 'Stay and wait longer', nextScene: 2 }
+                ]
+            },
+            {
+                text: 'You encounter a menacing skeleton warrior!',
+                choices: [
+                    { text: 'Fight the skeleton warrior', nextScene: 8 },
+                    { text: 'Try to talk to it', nextScene: 9 }
+                ],
+                enemy: 'Skeleton Warrior',
+                riddle: 'I speak without a mouth and hear without ears. What am I?'
+            },
+            {
+                text: 'You rest for a while and recover your strength.',
+                choices: [
+                    { text: 'Continue exploring', nextScene: 6 },
+                    { text: 'Rest longer', nextScene: 7 }
+                ]
+            },
+            {
+                text: 'You defeated the skeleton warrior! It reveals a piece of your identity before dying: "You are the last of your kind, destined to save this realm."',
+                choices: [
+                    { text: 'Continue exploring', nextScene: 10 },
+                    { text: 'Rest for a while', nextScene: 7 }
+                ]
+            },
+            {
+                text: 'The skeleton warrior attacks you before you can talk!',
+                choices: [
+                    { text: 'Fight back', nextScene: 8 },
+                    { text: 'Run away', nextScene: 6 }
+                ]
+            },
+            {
+                text: 'You reach the final chamber where the Skeleton King awaits!',
+                choices: [
+                    { text: 'Confront the Skeleton King', nextScene: 11 }
+                ]
+            },
+            {
+                text: 'The Skeleton King blocks your path. "Solve these three riddles to pass," he says.',
+                choices: [
+                    { text: 'Solve the first riddle', nextScene: 12 },
+                    { text: 'Attack the Skeleton King', nextScene: 13 }
+                ],
+                enemy: 'Skeleton King',
+                riddle1: 'I have cities, but no houses. I have mountains, but no trees. I have water, but no fish. What am I?',
+                riddle2: 'The more of this there is, the less you see. What is it?',
+                riddle3: 'What can travel around the world while staying in a corner?'
+            },
+            {
+                text: 'You solve the first riddle: "A map." The Skeleton King nods approvingly.',
+                choices: [
+                    { text: 'Solve the second riddle', nextScene: 14 }
+                ]
+            },
+            {
+                text: 'You attack the Skeleton King but he is too powerful. You must solve his riddles to defeat him.',
+                choices: [
+                    { text: 'Solve the first riddle', nextScene: 12 }
+                ]
+            },
+            {
+                text: 'You solve the second riddle: "Darkness." The Skeleton King gestures for you to continue.',
+                choices: [
+                    { text: 'Solve the third riddle', nextScene: 15 }
+                ]
+            },
+            {
+                text: 'You solve the third riddle: "A stamp." The Skeleton King is defeated and you regain your memory. You are a hero destined to save the realm!',
+                choices: [
+                    { text: 'Congratulations! Play again?', nextScene: 0 }
+                ]
+            }
+        ];
+
+        function makeChoice(choiceIndex) {
+            const scene = scenes[currentScene];
+            const nextSceneIndex = scene.choices[choiceIndex].nextScene;
+            const nextScene = scenes[nextSceneIndex];
+            currentScene = nextSceneIndex;
+            storyText.textContent = nextScene.text;
+
+            while (choices.firstChild) {
+                choices.removeChild(choices.firstChild);
+            }
+
+            nextScene.choices.forEach((choice, index) => {
+                const button = document.createElement('button');
+                button.textContent = choice.text;
+                button.classList.add('choice-button');
+                button.onclick = () => makeChoice(index);
+                choices.appendChild(button);
+            });
+
+            if (nextScene.enemy) {
+                const riddle = nextScene.riddle || `${nextScene.riddle1}, ${nextScene.riddle2}, ${nextScene.riddle3}`;
+                alert(`You encounter a ${nextScene.enemy}! Solve this riddle to proceed: ${riddle}`);
+            }
+        }
+    </script>
+</body>
+</html>
